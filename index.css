@@ -263,7 +263,7 @@ body {
 
 /* History List */
 .history-list {
-  padding-bottom: 10rem;
+  padding-bottom: 12rem;
 }
 
 .history-section-header {
@@ -289,7 +289,7 @@ body {
 
 /* Brand Groups */
 .brand-groups {
-  padding-bottom: 10rem;
+  padding-bottom: 12rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -650,7 +650,7 @@ body {
   gap: 1rem;
   padding: 1rem;
   overflow-y: auto;
-  padding-bottom: 10rem;
+  padding-bottom: 12rem;
 }
 
 .brand-card {
@@ -774,7 +774,7 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
-  padding-bottom: 12rem;
+  padding-bottom: 14rem;
 }
 
 /* Drink Selection */
