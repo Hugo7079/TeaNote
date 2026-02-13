@@ -15,60 +15,57 @@ const BrandList: React.FC<BrandListProps> = ({ onSelect }) => {
   );
 
   return (
-    <div className="flex flex-col h-full">
-        {/* Search Bar for Brands */}
-        <div className="px-4 py-2 sticky top-0 bg-gray-50 z-10">
-            <div className="relative">
+    <div className="brand-list-container">
+        <div className="brand-search-bar">
+            <div className="brand-search-wrapper">
                 <input 
                     type="text" 
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="搜尋飲料店品牌..."
-                    className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-tea-500 outline-none shadow-sm text-sm"
+                    className="brand-search-input"
                 />
-                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                <Search className="brand-search-icon" />
                 {search && (
                     <button 
                     onClick={() => setSearch('')}
-                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                    className="brand-search-clear"
                     >
-                        <X className="w-4 h-4" />
+                        <X />
                     </button>
                 )}
             </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 p-4 overflow-y-auto pb-20">
-            {/* Custom Brand Button - Always visible or at least when no exact match? Let's keep it first or last. */}
-            {/* Let's put it as the first option if search is empty or implies "other" */}
+        <div className="brand-grid">
             <button
                 onClick={() => onSelect({ id: 'custom', name: '其他品牌', color: '#9CA3AF', popularItems: [] })}
-                className="flex flex-col items-center justify-center aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 hover:border-gray-400 transition-all active:scale-95 text-gray-500"
+                className="brand-card brand-card-custom"
             >
-                <Plus className="w-8 h-8 mb-1" />
-                <span className="text-xs font-medium">自訂品牌</span>
+                <Plus />
+                <span className="brand-card-name">自訂品牌</span>
             </button>
 
             {filteredBrands.map((brand) => (
                 <button
                 key={brand.id}
                 onClick={() => onSelect(brand)}
-                className="flex flex-col items-center justify-center aspect-square rounded-2xl bg-white shadow-sm border border-gray-100 hover:border-tea-500 transition-all active:scale-95"
+                className="brand-card"
                 >
                 <div 
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold mb-2 shadow-sm border border-white/20"
+                    className="brand-card-icon"
                     style={{ backgroundColor: brand.color }}
                 >
                     {brand.name.substring(0, 1)}
                 </div>
-                <span className="text-sm font-medium text-gray-700 text-center px-1 truncate w-full">
+                <span className="brand-card-name">
                     {brand.name}
                 </span>
                 </button>
             ))}
 
             {filteredBrands.length === 0 && (
-                <div className="col-span-3 text-center py-8 text-gray-400 text-sm">
+                <div className="brand-grid-empty">
                     找不到「{search}」<br/>請使用左上角「自訂品牌」自行輸入
                 </div>
             )}

@@ -25,22 +25,17 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
   const [rating, setRating] = useState(5);
   const [note, setNote] = useState('');
   
-  // Local filter and AI search state
   const [filterQuery, setFilterQuery] = useState('');
   const [isSearchingAI, setIsSearchingAI] = useState(false);
   const [aiSearchResults, setAiSearchResults] = useState<string[]>([]);
 
   useEffect(() => {
     if (initialRecord) {
-      // Reconstruct the brand object or find it in list if possible, but minimal object is fine for now
       setBrand({ 
         id: initialRecord.brandId, 
         name: initialRecord.brandName, 
         color: '#ccc', 
         popularItems: [],
-        // In a real app we might want to look up the full brand details to get custom toppings/sizes
-        // for editing old records. For now, we rely on what was selected or defaults.
-        // We will try to find it in POPULAR_BRANDS to restore custom menus if available.
       });
       setDrinkName(initialRecord.drinkName);
       setSize(initialRecord.size || Size.LARGE);
@@ -52,17 +47,14 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
     }
   }, [initialRecord]);
 
-  // When brand changes (or on init), determine available options
   const availableToppings = brand?.customToppings || COMMON_TOPPINGS;
   const availableSizes = brand?.customSizes || SIZE_OPTIONS;
 
-  // Auto-select the first available size if the current size is invalid for this brand
   useEffect(() => {
     if (brand && availableSizes.length > 0 && !availableSizes.includes(size)) {
         setSize(availableSizes[0]);
     }
   }, [brand, availableSizes]);
-
 
   const handleBrandSelect = (selectedBrand: Brand) => {
     setBrand(selectedBrand);
@@ -115,23 +107,21 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
     });
   };
 
-  // --- Step 1: Select Brand ---
   if (step === 'brand') {
     return (
-      <div className="flex flex-col h-full bg-gray-50">
-        <div className="bg-white px-4 py-4 shadow-sm flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
+      <div className="app-container">
+        <div className="flow-header">
           <Button variant="ghost" size="sm" onClick={onCancel}>取消</Button>
-          <h2 className="text-lg font-bold text-gray-800">選擇品牌</h2>
-          <div className="w-10" /> 
+          <h2 className="flow-header-title">選擇品牌</h2>
+          <div style={{ width: '2.5rem' }} /> 
         </div>
-        <div className="flex-1 overflow-y-auto">
+        <div style={{ flex: 1, overflowY: 'auto' }}>
           <BrandList onSelect={handleBrandSelect} />
         </div>
       </div>
     );
   }
 
-  // --- Step 2: Select Drink ---
   if (step === 'drink') {
     const popularList = brand?.popularItems || [];
     const localFiltered = popularList.filter(item => 
@@ -140,47 +130,47 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
     const combinedList = Array.from(new Set([...localFiltered, ...aiSearchResults]));
 
     return (
-      <div className="flex flex-col h-full bg-gray-50">
-        <div className="bg-white px-4 py-4 shadow-sm flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
+      <div className="app-container">
+        <div className="flow-header">
           <Button variant="ghost" size="sm" onClick={() => setStep('brand')}>
-            <ChevronLeft className="w-5 h-5 mr-1" />
+            <ChevronLeft />
             重選
           </Button>
-          <h2 className="text-lg font-bold text-gray-800">{brand?.name}</h2>
-          <div className="w-16 flex justify-end">
+          <h2 className="flow-header-title">{brand?.name}</h2>
+          <div style={{ width: '4rem', display: 'flex', justifyContent: 'flex-end' }}>
                <button 
                 onClick={handleOpenMenuImage}
-                className="text-tea-600 p-2 hover:bg-tea-50 rounded-full"
+                className="menu-link-button"
                 title="查看官方菜單圖片"
                >
-                   <ExternalLink className="w-5 h-5" />
+                   <ExternalLink />
                </button>
           </div>
         </div>
 
-        <div className="p-4 flex-1 overflow-y-auto pb-24">
-            <div className="sticky top-0 bg-gray-50 z-10 pb-2">
-                <div className="relative mb-2">
+        <div className="flow-content">
+            <div className="drink-search-sticky">
+                <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
                     <input 
                         type="text" 
                         value={filterQuery}
                         onChange={(e) => setFilterQuery(e.target.value)}
                         placeholder="搜尋或輸入飲料名稱..."
-                        className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 focus:ring-2 focus:ring-tea-500 outline-none shadow-sm"
+                        className="drink-search-input"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') handleAiSearch();
                         }}
                     />
-                    <Search className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
+                    <Search style={{ position: 'absolute', left: '0.75rem', top: '0.875rem', width: '1.25rem', height: '1.25rem', color: 'var(--color-gray-400)' }} />
                     {filterQuery && (
                          <button 
                             onClick={() => {
                                 setFilterQuery('');
                                 setAiSearchResults([]);
                             }}
-                            className="absolute right-3 top-3.5 text-gray-400"
+                            style={{ position: 'absolute', right: '0.75rem', top: '0.875rem', color: 'var(--color-gray-400)', background: 'none', border: 'none', cursor: 'pointer' }}
                          >
-                             <X className="w-5 h-5" />
+                             <X style={{ width: '1.25rem', height: '1.25rem' }} />
                          </button>
                     )}
                 </div>
@@ -188,12 +178,12 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
                    <button
                     onClick={handleAiSearch}
                     disabled={isSearchingAI}
-                    className="w-full mb-2 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-medium flex items-center justify-center border border-indigo-100 hover:bg-indigo-100 transition-colors"
+                    className="drink-ai-button"
                    >
                        {isSearchingAI ? (
-                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                           <Loader2 className="spin" />
                        ) : (
-                           <Sparkles className="w-4 h-4 mr-2" />
+                           <Sparkles />
                        )}
                        {isSearchingAI ? 'AI 正在搜尋菜單...' : `找不到？用 AI 幫你找「${filterQuery}」`}
                    </button>
@@ -203,24 +193,24 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
             {filterQuery && (
                  <button
                     onClick={() => handleDrinkSelect(filterQuery)}
-                    className="w-full text-left px-4 py-4 mb-4 bg-tea-50 text-tea-700 rounded-xl font-bold shadow-sm border border-tea-100 flex items-center justify-between group"
+                    className="drink-custom-button"
                  >
                     <span>直接使用："{filterQuery}"</span>
-                    <ChevronLeft className="w-5 h-5 rotate-180 transition-transform group-hover:translate-x-1" />
+                    <ChevronLeft style={{ transform: 'rotate(180deg)' }} />
                  </button>
             )}
 
             {combinedList.length > 0 ? (
                 <div>
-                    <h3 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+                    <h3 className="drink-list-title">
                         {aiSearchResults.length > 0 ? 'AI 搜尋結果 & 菜單' : '店家菜單'}
                     </h3>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="drink-list">
                     {combinedList.map(item => (
                         <button
                             key={item}
                             onClick={() => handleDrinkSelect(item)}
-                            className="text-left px-4 py-3 bg-white rounded-xl font-medium shadow-sm border border-gray-100 hover:border-tea-400 hover:text-tea-700 active:bg-gray-50 transition-all"
+                            className="drink-item"
                         >
                             {item}
                         </button>
@@ -228,10 +218,10 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
                     </div>
                 </div>
             ) : (
-                <div className="text-center text-gray-400 py-10 px-4">
-                    <p className="mb-4">找不到相關飲料</p>
-                    <p className="text-xs text-gray-500">
-                        點擊右上角 <ExternalLink className="w-3 h-3 inline align-middle"/> 可查看線上菜單圖片
+                <div className="drink-list-empty">
+                    <p>找不到相關飲料</p>
+                    <p>
+                        點擊右上角 <ExternalLink /> 可查看線上菜單圖片
                     </p>
                 </div>
             )}
@@ -240,84 +230,68 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
     );
   }
 
-  // --- Step 3: Customize ---
   return (
-    <div className="flex flex-col h-full bg-gray-50">
-       <div className="bg-white px-4 py-4 shadow-sm flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
+    <div className="app-container">
+       <div className="flow-header">
           <Button variant="ghost" size="sm" onClick={() => setStep('drink')}>
-            <ChevronLeft className="w-5 h-5 mr-1" />
+            <ChevronLeft />
             重選
           </Button>
-          <div className="text-center">
-            <div className="text-xs text-gray-500">{brand?.name}</div>
-            <h2 className="text-lg font-bold text-gray-800">{drinkName}</h2>
+          <div className="flow-header-subtitle">
+            <div className="flow-header-subtitle-small">{brand?.name}</div>
+            <h2 className="flow-header-subtitle-large">{drinkName}</h2>
           </div>
-          <div className="w-16" />
+          <div className="flow-header-spacer" />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 pb-32">
+        <div className="flow-content">
             
-            <section className="mb-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <h3 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider flex items-center">
-                    <span className="w-1 h-4 bg-blue-500 rounded-full mr-2"></span>
+            <section className="customize-section">
+                <h3 className="customize-section-title title-size">
                     容量 Size
                 </h3>
-                <div className={`grid gap-2 ${availableSizes.length <= 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                <div className={`option-grid ${availableSizes.length <= 2 ? 'option-grid-2' : 'option-grid-3'}`}>
                     {availableSizes.map(opt => (
                         <button
                             key={opt}
                             onClick={() => setSize(opt)}
-                            className={`py-3 px-1 text-sm rounded-lg border transition-all ${
-                                size === opt 
-                                ? 'bg-blue-500 text-white border-blue-600 shadow-md transform scale-[1.02]' 
-                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                            }`}
+                            className={`option-button ${size === opt ? 'active size' : ''}`}
                         >
                             {opt.split('(')[0]}
-                            <span className="text-[10px] ml-1 opacity-80">({opt.split('(')[1]}</span>
+                            <span className="option-button-small">({opt.split('(')[1]}</span>
                         </button>
                     ))}
                 </div>
             </section>
 
-            <section className="mb-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <h3 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider flex items-center">
-                    <span className="w-1 h-4 bg-tea-500 rounded-full mr-2"></span>
+            <section className="customize-section">
+                <h3 className="customize-section-title title-sugar">
                     甜度 Sugar
                 </h3>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="option-grid option-grid-3">
                     {SUGAR_OPTIONS.map(opt => (
                         <button
                             key={opt}
                             onClick={() => setSugar(opt)}
-                            className={`py-2 px-1 text-sm rounded-lg border transition-all ${
-                                sugar === opt 
-                                ? 'bg-tea-500 text-white border-tea-600 shadow-md transform scale-[1.02]' 
-                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                            }`}
+                            className={`option-button ${sugar === opt ? 'active sugar' : ''}`}
                         >
                             {opt.split(' ')[0]} 
-                            <span className="block text-[10px] opacity-80">{opt.split(' ')[1]}</span>
+                            <span className="option-button-small">{opt.split(' ')[1]}</span>
                         </button>
                     ))}
                 </div>
             </section>
 
-            <section className="mb-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <h3 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider flex items-center">
-                    <span className="w-1 h-4 bg-cyan-500 rounded-full mr-2"></span>
+            <section className="customize-section">
+                <h3 className="customize-section-title title-ice">
                     冰塊 Ice
                 </h3>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="option-grid option-grid-4">
                     {ICE_OPTIONS.map(opt => (
                         <button
                             key={opt}
                             onClick={() => setIce(opt)}
-                            className={`py-2 px-1 text-sm rounded-lg border transition-all ${
-                                ice === opt 
-                                ? 'bg-cyan-500 text-white border-cyan-600 shadow-md transform scale-[1.02]' 
-                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                            }`}
+                            className={`option-button ${ice === opt ? 'active ice' : ''}`}
                         >
                             {opt}
                         </button>
@@ -325,21 +299,16 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
                 </div>
             </section>
 
-            <section className="mb-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                 <h3 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider flex items-center">
-                    <span className="w-1 h-4 bg-orange-500 rounded-full mr-2"></span>
+            <section className="customize-section">
+                 <h3 className="customize-section-title title-toppings">
                     加料 Toppings
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="toppings-flex">
                     {availableToppings.map(t => (
                         <button
                             key={t}
                             onClick={() => toggleTopping(t)}
-                            className={`py-1.5 px-3 text-sm rounded-full border transition-all ${
-                                selectedToppings.includes(t)
-                                ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                            }`}
+                            className={`topping-button ${selectedToppings.includes(t) ? 'active' : ''}`}
                         >
                             {t}
                         </button>
@@ -347,18 +316,18 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
                 </div>
             </section>
 
-            <section className="mb-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                 <h3 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider flex items-center">
-                    <span className="w-1 h-4 bg-yellow-400 rounded-full mr-2"></span>
+            <section className="customize-section">
+                 <h3 className="customize-section-title title-rating">
                     評分 Rating
                  </h3>
-                 <div className="flex justify-center">
+                 <div className="rating-stars">
                     {[1, 2, 3, 4, 5].map(r => (
-                        <button key={r} onClick={() => setRating(r)} className="p-2 focus:outline-none transition-transform active:scale-125">
-                            <svg 
-                                className={`w-8 h-8 ${r <= rating ? 'text-yellow-400 fill-current' : 'text-gray-200 fill-current'}`} 
-                                viewBox="0 0 24 24"
-                            >
+                        <button 
+                            key={r} 
+                            onClick={() => setRating(r)} 
+                            className={`star-button ${r <= rating ? 'filled' : ''}`}
+                        >
+                            <svg viewBox="0 0 24 24">
                                 <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                             </svg>
                         </button>
@@ -366,22 +335,21 @@ const AddDrinkFlow: React.FC<AddDrinkFlowProps> = ({ initialRecord, onSave, onCa
                  </div>
             </section>
 
-            <section className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <h3 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider flex items-center">
-                    <span className="w-1 h-4 bg-gray-400 rounded-full mr-2"></span>
+            <section className="customize-section">
+                <h3 className="customize-section-title title-note">
                     備註 Note
                 </h3>
                 <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="這家珍珠偏硬，建議..."
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-tea-500 outline-none resize-none h-24"
+                    className="note-textarea"
                 />
             </section>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <Button onClick={handleSave} fullWidth size="lg" className="shadow-lg shadow-tea-200">
+        <div className="flow-footer">
+            <Button onClick={handleSave} fullWidth size="lg">
                 {initialRecord ? '更新紀錄' : '加入紀錄'}
             </Button>
         </div>

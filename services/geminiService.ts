@@ -2,11 +2,23 @@ import { GoogleGenAI } from "@google/genai";
 
 const apiKey = process.env.API_KEY || '';
 
-// Initialize only if key is present to avoid immediate errors, though usage will be guarded.
-const ai = new GoogleGenAI({ apiKey });
+// Lazy initialization - only create instance when actually needed
+let ai: GoogleGenAI | null = null;
+
+function getAI(): GoogleGenAI | null {
+  if (!apiKey) {
+    return null;
+  }
+  if (!ai) {
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+}
 
 export async function searchDrinkMenu(brandName: string, query?: string): Promise<string[]> {
-  if (!apiKey) {
+  const aiInstance = getAI();
+  
+  if (!aiInstance) {
     console.warn("No API Key provided for Gemini.");
     return ["請設定 API Key 以使用 AI 菜單搜尋功能"];
   }
@@ -16,7 +28,7 @@ export async function searchDrinkMenu(brandName: string, query?: string): Promis
     : `請列出台灣飲料店「${brandName}」目前最熱門或推薦的 8 款飲料名稱。請確保資訊是真實存在的菜單。只回傳飲料名稱清單，以條列式呈現，不要有編號。`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await aiInstance.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
@@ -40,12 +52,14 @@ export async function searchDrinkMenu(brandName: string, query?: string): Promis
 }
 
 export async function suggestCustomization(brandName: string, drinkName: string): Promise<string> {
-   if (!apiKey) return "";
+   const aiInstance = getAI();
+   
+   if (!aiInstance) return "";
 
    const prompt = `對於台灣飲料店「${brandName}」的「${drinkName}」，網友或老饕通常推薦什麼甜度冰塊比例最好喝？請用一句簡短的話回答（例如：推薦微糖少冰）。`;
 
    try {
-    const response = await ai.models.generateContent({
+    const response = await aiInstance.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
