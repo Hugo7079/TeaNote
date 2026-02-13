@@ -1,7 +1,8 @@
 {
   "name": "Tea Note",
   "short_name": "茶記",
-  "start_url": "/",
+  "start_url": "/TeaNote/",
+  "scope": "/TeaNote/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
